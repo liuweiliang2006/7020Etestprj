@@ -1,0 +1,6 @@
+--c99 -c --cpu Cortex-M0 -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I../Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc -I../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy -I../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM0 -I../Drivers/CMSIS/Device/ST/STM32F0xx/Include -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS -I../Drivers/CMSIS/Include -I../Drivers/BSP/Inc -I../Middlewares/Third_Party/GsmLib
+-I F:\TestGitHub\P4.5\GitHub\Firmware_P4.5_20190305\GasMeter4\MDK-ARM\RTE
+-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\4.2.0\CMSIS\Include
+-I C:\Keil_v5\ARM\PACK\Keil\STM32F0xx_DFP\2.0.0
+-D__UVISION_VERSION="514" -D_RTE_ -DSTM32F030xC -DUSE_HAL_DRIVER -DSTM32F030xC
+-o gasmeter4\cookingsessionreport.o --omf_browse gasmeter4\cookingsessionreport.crf --depend gasmeter4\cookingsessionreport.d --feedback "GasMeter4\GasMeter4.fed" "..\User\CookingSessionReport.c"
