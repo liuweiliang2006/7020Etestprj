@@ -91,3 +91,5 @@ gasmeter4\freertos.o: ../Inc/CustomerCredit.h
 gasmeter4\freertos.o: ../Inc/InformationPacket.h
 gasmeter4\freertos.o: ../Inc/UsedResetPacket.h
 gasmeter4\freertos.o: ../Inc/iwdg.h
+gasmeter4\freertos.o: ../Inc/hextochar.h
+gasmeter4\freertos.o: ../Inc/chartohex.h

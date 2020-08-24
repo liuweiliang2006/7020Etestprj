@@ -69,6 +69,8 @@
 #include "InformationPacket.h"
 #include "UsedResetPacket.h"
 #include "iwdg.h"
+#include "hextochar.h"
+#include "chartohex.h"
 /* USER CODE END Includes */
 
 /* Variables -----------------------------------------------------------------*/
@@ -289,6 +291,7 @@ void StartLedTask(void const * argument);
 void StartCmdAnalyzTask(void const * argument);
 void Sim80xBuffTask(void const * argument);
 void M26test_Task(void const * argument);
+void Sim7020Etest_Task(void const * argument);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 /* USER CODE BEGIN FunctionPrototypes */
@@ -691,8 +694,8 @@ void MX_FREERTOS_Init(void) {
 //  osThreadDef(myTaskCmdAnalyz, StartCmdAnalyzTask, osPriorityNormal, 0, 256);
 //  myTaskCmdAnalyzHandle = osThreadCreate(osThread(myTaskCmdAnalyz), NULL);
 
-	osThreadDef(M26test, M26test_Task, osPriorityNormal, 0, 512);
-  myTaskCmdAnalyzHandle = osThreadCreate(osThread(M26test), NULL);
+	osThreadDef(Sim7020Etest, Sim7020Etest_Task, osPriorityNormal, 0, 512);
+  myTaskCmdAnalyzHandle = osThreadCreate(osThread(Sim7020Etest), NULL);
   /* definition and creation of myTaskSim80xBuf */
   osThreadDef(myTaskSim80xBuf, Sim80xBuffTask, osPriorityNormal, 0, 256);
   myTaskSim80xBufHandle = osThreadCreate(osThread(myTaskSim80xBuf), NULL);
@@ -3674,7 +3677,7 @@ void StartCmdAnalyzTask(void const * argument)
 #define SEVER_URL "https://ateei9d448.execute-api.eu-west-1.amazonaws.com/"
 #define SEVER_VERSION "testing/"
 
-#define M26GETCOMMANDLEN 13
+#define M26GETCOMMANDLEN 9
 #define M26POSTCOMMANDLEN 15
 
 typedef uint8_t (*Cmd_Analysis)(char *pCmd);
@@ -3699,80 +3702,59 @@ typedef struct ATInfo{
 
 stru_P4_command_t Send_AT_cmd[]={
 	          //  u8CmdNum  SendCommand																			pFun
-/*0*/			{     	1,			 "AT\r\n",																	Analysis_AT_Cmd					},
-/*1*/			{     	2,			 "AT+CSQ\r\n",															Analysis_CSQ_Cmd				},
-/*2*/			{     	3,			 "AT+QIREGAPP\r\n",													Analysis_QIREGAPP_Cmd		},
-/*3*/			{     	4,			 "AT+QIACT\r\n",														Analysis_QIACT_Cmd			},
-/*4*/			{     	5,			 "AT+QILOCIP\r\n",													Analysis_QILOCIP_Cmd		},
-/*5*/			{     	6,			 "AT+QSSLCFG=\"sni\",0,1\r\n",							Analysis_SNI_Cmd				},
-/*6*/			{     	7,			 "AT+QSSLCFG=\"https\",1\r\n",							Analysis_QSSLCFG_Cmd		},
-/*7*/			{     	8,			 "AT+QSSLCFG=\"httpsctxi\",0\r\n",					Analysis_QSSLCFG_Cmd		},
-/*8*/			{     	9,			 NULL											,									Analysis_QHTTPURL_Cmd		}, //AT+QHTTPURL=88,60
-/*9*/			{     	10,			 NULL,																			Analysis_SEVER_Addr_Cmd	},
-/*10*/		{     	11,			 "AT+QHTTPGET=60,120\r\n",									Analysis_QHTTPGET_Cmd		},  //GET请求
-/*11*/		{     	12,			 "AT+QHTTPREAD\r\n",												Analysis_QHTTPREAD_Cmd	},
-/*12*/		{     	13,			 "AT+QIDEACT\r\n",													Analysis_QIDEACT_Cmd		},
-/*13*/		{     	14,			 "at+qhttpcfg=\"CONTENT-TYPE\",\"application/json\"\r\n",					Analysis_QSSLCFG_Cmd		},//设置JSON格式
-/*14*/		{     	15,			 NULL,																			Analysis_QHTTPPOST_Cmd		},//AT+QHTTPPOST=272\r\n
-/*15*/		{     	16,			 NULL,																			Analysis_POSTDATA_Cmd		}, //POST 指令携带的数据
+/*0*/			{     	1,			 "AT\r\n",																	Analysis_AT_Cmd							},
+/*1*/			{     	2,			 "AT+CSQ\r\n",															Analysis_CSQ_Cmd						},
+/*2*/			{     	3,			 "AT+CGREG?\r\n",														Analysis_CGREG_Cmd					},
+/*3*/			{     	4,			 "AT+CGACT?\r\n",														Analysis_CGACT_Cmd					},
+/*4*/			{     	5,			 NULL,																			Analysis_CHTTPCREATE_Cmd		}, //AT+CHTTPCREATE="https://ateei9d448.execute-api.eu-west-1.amazonaws.com/"
+/*5*/			{     	6,			 "AT+CHTTPCON=0\r\n",												Analysis_CHTTPCON_Cmd				},//AT+CHTTPSEND=0,0,"/testing/meter/settings/TZ00000525"
+/*6*/			{     	7,			 NULL,																			Analysis_CHTTPSEND_Cmd			},
+/*7*/			{     	8,			 "AT+CHTTPDISCON=0\r\n",										Analysis_CHTTPDISCON_Cmd		},
+/*8*/			{     	9,			 "AT+CHTTPDESTROY=0\r\n",										Analysis_CHTTPDESTROY_Cmd		},
 };
 
 
-uint8_t u8GetNum[M26GETCOMMANDLEN]= {0,1,2,3,4,5,6,7,8,9,10,11,12};
+uint8_t u8GetNum[M26GETCOMMANDLEN]= {0,1,2,3,4,5,6,7,8};
 uint8_t u8PostNum[M26POSTCOMMANDLEN] = {0,1,2,3,4,5,6,7,8,9,13,14,15,11,12};
 uint8_t u8SniNum[3] = {0,1,5};
 
 //type:command,parameters,cookingSession,hardware,info,warning
-static char * Sever_Address_GET(const Stru_Sever_Info_t* SeverInfo,char* type)
+//函数返回指针，调用后使用完后应释放
+static char * Sever_Address_GET(char *severaddr)
 {
 	uint8_t u8Lenth = 0;
 	char* ptUrlInfo;
-//	u8Lenth = strlen(type);
-
-	u8Lenth = strlen(SeverInfo->Sendsever)+strlen(SeverInfo->SeverVer)+strlen(SeverInfo->MeterId)+strlen(SeverInfo->CardID)+strlen(type)+10;
-
-	ptUrlInfo = (char *) malloc(u8Lenth);
-	memset(ptUrlInfo,0,u8Lenth);
-	printf("malloc end\r\n");
-	u8Lenth = 0;
-	u8Lenth = strlen(SeverInfo->Sendsever);
-	if(u8Lenth != 0)
-	{
-		strcat(ptUrlInfo,SeverInfo->Sendsever);
-	}
-	//版本号拼接
-	u8Lenth = 0;
-	u8Lenth = strlen(SeverInfo->SeverVer);
-	if(u8Lenth != 0)
-	{
-		strcat(ptUrlInfo,SeverInfo->SeverVer);
-	}
 	
-	u8Lenth = 0;
-	u8Lenth = strlen(SeverInfo->MeterId);
-	if(u8Lenth != 0)
+	u8Lenth = strlen(severaddr);
+	ptUrlInfo = (char *)malloc(u8Lenth*sizeof(char)+strlen("AT+CHTTPCREATE=")+10);
+	if(ptUrlInfo != NULL)//分配成功
 	{
-		strcat(ptUrlInfo,SeverInfo->MeterId);
-	}
-	
-	u8Lenth = 0;
-	u8Lenth = strlen(SeverInfo->CardID);
-	if(u8Lenth != 0)
-	{
-		strcat(ptUrlInfo,SeverInfo->CardID);
-	}
-	
-	u8Lenth = 0;
-	u8Lenth = strlen(type);
-	if(u8Lenth != 0)
-	{
-		strcat(ptUrlInfo,type);
-	}
-	
-	strcat(ptUrlInfo,"\r\n");
-	
+		strcat(ptUrlInfo,"AT+CHTTPCREATE=");
+		strcat(ptUrlInfo,"\"");
+		strcat(ptUrlInfo,severaddr);
+		strcat(ptUrlInfo,"\"");
+		strcat(ptUrlInfo,"\r\n");
+	}	
 	return ptUrlInfo;
 }
+
+static char * HTTPS_Get_Data(char *version,char *meterid)
+{
+	char* ptUrlInfo;
+
+	ptUrlInfo = (char *)malloc(strlen(version)+strlen(meterid)+strlen("AT+CHTTPSEND=0,0,")+15);
+	if(ptUrlInfo != NULL)//分配成功
+	{
+		strcat(ptUrlInfo,"AT+CHTTPSEND=0,0,");
+		strcat(ptUrlInfo,"\"/");
+		strcat(ptUrlInfo,version);
+		strcat(ptUrlInfo,meterid);
+		strcat(ptUrlInfo,"\"");
+		strcat(ptUrlInfo,"\r\n");
+	}	
+	return ptUrlInfo;
+}
+
 static char * Post_Data_Cmd(char *postdata)
 {
 	char* ptPostInfo;
@@ -3789,6 +3771,30 @@ static char * Post_Data_Cmd(char *postdata)
 	strcat(ptPostInfo,"\r\n");
 }
 
+static void SendGetCommand()
+{
+	uint8_t i = 0;
+	uint32_t Waiting_ms = 0;
+//	for(i=0;i< sizeof(Send_AT_cmd)/sizeof(Send_AT_cmd[0]);i++)M26GETCOMMANDLEN
+	for(i=0;i< M26GETCOMMANDLEN;i++)
+	{
+//		if((u8GetNum[i]!=5))
+		{
+			printf("send:%s\r\n\r\n",Send_AT_cmd[u8GetNum[i]].SendCommand);
+			Sim80x.AtCommand.FindAnswer = 0;
+			xQueueSend(SendATQueue,(void *) &Send_AT_cmd[u8GetNum[i]].u8CmdNum,(TickType_t)10);	 
+			Sim80x_SendAtCommand(Send_AT_cmd[u8GetNum[i]].SendCommand,1000,1,"OK\r\n");
+			osDelay(2000);
+			while(!Sim80x.AtCommand.FindAnswer)
+			{
+				if((i!=4)&&(i!=5)&&(i!=6))
+				Sim80x_SendAtCommand(Send_AT_cmd[u8GetNum[i]].SendCommand,1000,1,"OK\r\n");
+				osDelay(2000);
+			}
+		}
+		
+	}
+}
 QueueHandle_t SendATQueue = NULL;
 SemaphoreHandle_t  Semaphore_Uart_Rec = NULL;
 void AppObjCreateQueue (void)
@@ -3811,284 +3817,43 @@ void AppObjCreate (void)
 			/* 没有创建成功，用户可以在这里加入创建失败的处理机制 */
 	}
 }
-//该函数用于实现对发送URL（sever）长度的计算，并将计算结果添充到Send_AT_cmd[7].SendCommand
-static void UrlLength(uint16_t length)
-{
-	char *ptUrlCharLength,chUrl[20]="AT+QHTTPURL=";
-	char str;
-	uint16_t i ;
-	ptUrlCharLength = (char *) malloc(length+strlen(chUrl));
-	itoa(length,ptUrlCharLength,10); 
-	strcat(chUrl,ptUrlCharLength);
-	strcat(chUrl,",60\r\n");
-	for(i =0;i<strlen(chUrl);i++)
-	{
-		str = chUrl[i];
-		Send_AT_cmd[8].SendCommand[i] = str;
-	}
-}
-//AT+QHTTPURL 9
-//AT+QHTTPPOST  15
-static void CmdLength(uint16_t urllength,uint8_t cmd_num)
-{
-	char ptUrlCharLength[4],chUrl[20];
-	char str;
-	uint16_t i ;
-//	ptUrlCharLength = (char *) malloc(urllength+strlen(chUrl));
-	itoa(urllength,ptUrlCharLength,10); 
-	if(cmd_num == Send_AT_cmd[8].u8CmdNum)  //如果需要填充AT+QHTTPURL指令
-	{
-		strcpy(chUrl,"AT+QHTTPURL=");
-		strcat(chUrl,ptUrlCharLength);
-//		strcat(chUrl,",60\r\n");
-		strcat(chUrl,"\r\n");
-		for(i =0;i<strlen(chUrl);i++)
-		{
-			str = chUrl[i];
-			Send_AT_cmd[8].SendCommand[i] = str;
-		}
-	}
-
-	if(cmd_num == Send_AT_cmd[14].u8CmdNum)  //如果需要填充AT+QHTTPPOST=272
-	{
-		strcpy(chUrl,"AT+QHTTPPOST=");
-		strcat(chUrl,ptUrlCharLength);
-		strcat(chUrl,"\r\n");
-		for(i =0;i<strlen(chUrl);i++)
-		{
-			str = chUrl[i];
-			Send_AT_cmd[14].SendCommand[i] = str;
-		}
-	}	
-
-}
-static void SendGetCommand()
-{
-	uint8_t i = 0;
-//	for(i=0;i< sizeof(Send_AT_cmd)/sizeof(Send_AT_cmd[0]);i++)M26GETCOMMANDLEN
-	for(i=0;i< M26GETCOMMANDLEN;i++)
-	{
-		if((u8GetNum[i]!=5))
-		{
-			printf("send:%s\r\n\r\n",Send_AT_cmd[u8GetNum[i]].SendCommand);
-			Sim80x.AtCommand.FindAnswer = 0;
-			xQueueSend(SendATQueue,(void *) &Send_AT_cmd[u8GetNum[i]].u8CmdNum,(TickType_t)10);	 
-			Sim80x_SendAtCommand(Send_AT_cmd[u8GetNum[i]].SendCommand,1000,1,"AT\r\r\nOK\r\n");
-			osDelay(2000);
-			while(!Sim80x.AtCommand.FindAnswer)
-			{
-				Sim80x_SendAtCommand(Send_AT_cmd[u8GetNum[i]].SendCommand,1000,1,"OK\r\n");
-				osDelay(2000);
-			}
-		}
-		
-	}
-}
-
-static void SendPostCommand()
-{
-	uint8_t i = 0;
-	uint8_t u8Lenth = 0;
-//	for(i=0;i< sizeof(Send_AT_cmd)/sizeof(Send_AT_cmd[0]);i++)M26GETCOMMANDLEN
-	for(i=0;i< M26POSTCOMMANDLEN;i++)
-	{
-		if((u8PostNum[i]!=5))
-		{
-			printf("send:%s\r\n\r\n",Send_AT_cmd[u8PostNum[i]].SendCommand);
-			Sim80x.AtCommand.FindAnswer = 0;
-			xQueueSend(SendATQueue,(void *) &Send_AT_cmd[u8PostNum[i]].u8CmdNum,(TickType_t)10);	 
-			Sim80x_SendAtCommand(Send_AT_cmd[u8PostNum[i]].SendCommand,1000,1,"AT\r\r\nOK\r\n");
-			osDelay(2000);
-			while(!Sim80x.AtCommand.FindAnswer)
-			{
-//				if(u8PostNum[i]!= 15)
-				{
-					Sim80x_SendAtCommand(Send_AT_cmd[u8PostNum[i]].SendCommand,1000,1,"OK\r\n");
-					osDelay(2000);
-				}				
-			}
-		}
-//		osDelay(5000);
-	}
-}
-
-static void M26_Sni_Init(void )
-{
-	uint8_t i = 0;
-	for(i = 0;i < 3;i++)
-	{
-		{
-			printf("send %s\r\n\r\n",Send_AT_cmd[u8SniNum[i]].SendCommand);
-			Sim80x.AtCommand.FindAnswer = 0;
-			xQueueSend(SendATQueue,(void *) &Send_AT_cmd[u8SniNum[i]].u8CmdNum,(TickType_t)10);	 
-			Sim80x_SendAtCommand(Send_AT_cmd[u8SniNum[i]].SendCommand,1000,1,"AT\r\r\nOK\r\n");
-			osDelay(2000);
-			while(!Sim80x.AtCommand.FindAnswer)
-			{
-				{
-					Sim80x_SendAtCommand(Send_AT_cmd[u8SniNum[i]].SendCommand,1000,1,"OK\r\n");
-					osDelay(2000);
-				}				
-			}
-		}		
-	}
-}
 
 
-void M26test_Task(void const * argument)
+void Sim7020Etest_Task(void const * argument)
 {
 	Stru_Sever_Info_t *struSeverInfo;
 	uint8_t result = 0 , i = 0; //于用标识，是否响应了当前的指令
 	uint32_t count_times = 1;
-	char *ptUrl,*ptPost;
+	char *ptUrl,*ptData;
 	char *ptPostData;
-	volatile uint16_t u8UrlLength = 0;
-	Send_AT_cmd[8].SendCommand =(char *)malloc(20);
+	volatile uint16_t u16UrlLength = 0;
+	
 	Send_AT_cmd[14].SendCommand =(char *)malloc(20);
 	struSeverInfo = (struct SeverInfo *) malloc(sizeof(struct SeverInfo));
-//	struSeverInfo->CardID = (char *) malloc(sizeof(char)*50);
-//	struSeverInfo->MeterId = (char *) malloc(sizeof(char)*50);
-//	struSeverInfo->Sendsever = (char *) malloc(strlen(SEVER_URL)+10);
-//	struSeverInfo->SeverVer = (char *) malloc(sizeof(char)*10);
+
 	HAL_GPIO_WritePin(_SIM80X_POWER_KEY_GPIO,_SIM80X_POWER_KEY_PIN,GPIO_PIN_RESET);
 						
 	HAL_GPIO_WritePin(_SIM80X_POWER_KEY_GPIO,_SIM80X_POWER_KEY_PIN,GPIO_PIN_SET);
 	HAL_UART_Receive_IT(&_SIM80X_USART,&Sim80x.UsartRxTemp,1);
-	printf("sni init\r\n");
-	M26_Sni_Init();
 	while(1)
 	{
 		struSeverInfo->Sendsever = SEVER_URL;
-		u8UrlLength = strlen(struSeverInfo->Sendsever);
+		u16UrlLength = strlen(struSeverInfo->Sendsever);
 		struSeverInfo->SeverVer = SEVER_VERSION;
 		struSeverInfo->CardID = "";
-
-		printf("************************************************************************************************\r\n");
-		printf("test times %d\r\n",count_times);
-		count_times++;
-		//get command  curl -X GET "https://ateei9d448.execute-api.eu-west-1.amazonaws.com/testing/meter/command/TZ00000525"
-//		printf("--------------------------------------------------------------------------------------------------");
-//		struSeverInfo->MeterId = "meter/command/TZ00000525";
-//		ptUrl = Sever_Address_GET( struSeverInfo,"");
-//		Send_AT_cmd[9].SendCommand = ptUrl;
-//		u8UrlLength = strlen(ptUrl)-2;
-////		UrlLength(u8UrlLength);
-//		CmdLength(u8UrlLength,9);  //根据发送URL的长度
-//		SendGetCommand();
-//		free(ptUrl);		
-//		printf("--------------------------------------------------------------------------------------------------");
-		printf("--------------------------------------------------------------------------------------------------");
-		//get settings  curl -X GET "https://ateei9d448.execute-api.eu-west-1.amazonaws.com/testing/meter/settings/TZ00000525"
-		struSeverInfo->MeterId = "meter/settings/TZ00000525";
-		ptUrl = Sever_Address_GET( struSeverInfo,"");
-		printf("Sever_Address_GET\r\n");
-		Send_AT_cmd[9].SendCommand = ptUrl;
-		u8UrlLength = strlen(ptUrl)-2;
-//		UrlLength(u8UrlLength);
-		CmdLength(u8UrlLength,9);  //根据发送URL的长度
+		
+		struSeverInfo->MeterId = "/meter/settings/TZ00000525";		
+		ptUrl = Sever_Address_GET(struSeverInfo->Sendsever);
+		u16UrlLength = strlen(ptUrl);
+		Send_AT_cmd[4].SendCommand = ptUrl;
+		
+		ptData = HTTPS_Get_Data(struSeverInfo->SeverVer,struSeverInfo->MeterId);
+		u16UrlLength = strlen(ptData);
+		Send_AT_cmd[6].SendCommand = ptData;
 		SendGetCommand();
-		free(ptUrl);
-		printf("--------------------------------------------------------------------------------------------------");
-		printf("--------------------------------------------------------------------------------------------------");
-		//get firmware  curl -X GET "https://ateei9d448.execute-api.eu-west-1.amazonaws.com/testing/meter/firmware/TZ00000525"
-		struSeverInfo->MeterId = "meter/firmware/TZ00000525";
-		ptUrl = Sever_Address_GET( struSeverInfo,"");
-		printf("Sever_Address_GET\r\n");
-		Send_AT_cmd[9].SendCommand = ptUrl;
-		u8UrlLength = strlen(ptUrl)-2;
-//		UrlLength(u8UrlLength);
-		CmdLength(u8UrlLength,9);  //根据发送URL的长度
-		SendGetCommand();
-		free(ptUrl);
-		printf("--------------------------------------------------------------------------------------------------");
 		
-		printf("--------------------------------------------------------------------------------------------------");
-		// post  cookingSession   https://ateei9d448.execute-api.eu-west-1.amazonaws.com/testing/meter/cookingSession/TZ00000235/9088450934850394385
-		struSeverInfo->MeterId = "meter/cookingSession/KE1000000012/9088450934850394385";
-		ptPostData = "{\"cookingSessionId\":\"xxxxxxxxxxxxxxx\",\
-		\"startTime\":\"2016-08-29T09:12:33.001Z\",\
-		\"endTime\":\"2016-08-29T09:12:33.001Z\",\
-		\"endReason\":2,\
-		\"endCumulativeMass\":105.97,\
-		\"startCumulativeMass\":100.9,\
-		\"gasConsumed\":4,\
-		\"startCredit\":34,\
-		\"endCredit\":22,\
-		\"creditConsumed\":12,\
-		\"gasRemaining\":12000\
-		}";		
-		ptUrl = Sever_Address_GET( struSeverInfo,"");
-		printf("Sever_Address_GET\r\n");
-		Send_AT_cmd[9].SendCommand = ptUrl;
-		u8UrlLength = strlen(ptUrl)-2;
-		CmdLength(u8UrlLength,9);  //根据发送URL的长度		
-		ptPost = Post_Data_Cmd( ptPostData);
-		Send_AT_cmd[15].SendCommand = ptPost;
-		u8UrlLength = strlen(ptPost)-2;
-		CmdLength(u8UrlLength,15);  //根据发送POST的长度
-		SendPostCommand();
 		free(ptUrl);
-		free(ptPost);
-		
-		printf("--------------------------------------------------------------------------------------------------");
-		printf("--------------------------------------------------------------------------------------------------");
-		//post settings   https://ateei9d448.execute-api.eu-west-1.amazonaws.com/testing/meter/settings/TZ00000235
-		struSeverInfo->MeterId = "meter/settings/TZ00000235";
-		ptPostData = "{\"command\": \"STUP\",\
-		\"serverIPaddress\": \"198.51.100.42\",\
-		\"serverPort\": 5070,\
-		\"gasLevel\": 9800,\
-		\"dataUploadPeriod\": 360,\
-		\"warningLowBatteryVoltage\": 4.5,\
-		\"warningLowCreditBalance\": 80,\
-		\"warningLowGasVolumeAlarm\": 2000,\
-		\"metercurrency\": \"KES\",\
-		\"uploadFrequency\": 360,\
-		\"uploadTime\": 0,\
-		\"sensorSlope\": 2.3,\
-		\"sensor:Intercept\": 0.1,\
-		\"infoDatestamp\": \"2016-08-29T09:12:33.001Z\"\
-		}";		
-		ptUrl = Sever_Address_GET( struSeverInfo,"");
-		printf("Sever_Address_GET\r\n");
-		Send_AT_cmd[9].SendCommand = ptUrl;
-		u8UrlLength = strlen(ptUrl)-2;
-		CmdLength(u8UrlLength,9);  //根据发送URL的长度		
-		ptPost = Post_Data_Cmd( ptPostData);
-		Send_AT_cmd[15].SendCommand = ptPost;
-		u8UrlLength = strlen(ptPost)-2;
-		CmdLength(u8UrlLength,15);  //根据发送POST的长度
-		SendPostCommand();
-		free(ptUrl);
-		free(ptPost);
-		printf("--------------------------------------------------------------------------------------------------");
-		printf("--------------------------------------------------------------------------------------------------");
-		
-		//post status  https://ateei9d448.execute-api.eu-west-1.amazonaws.com/testing/meter/status/TZ00000235
-		struSeverInfo->MeterId = "meter/status/TZ00000235";
-		ptPostData = "{\"batteryVoltage\": 2,\
-		\"gasTemperature\": 15,\
-	\"tankLockStatus\": true,\
-	\"tankSensorStatus\": false,\
-	\"gsmSignalIntensity\": 25,\
-	\"needleSensorStatus\": false,\
-	\"lidLightSensorStatus\": false\
-	\"electronicValveStatus\": false,\
-	\"lidElectricLockStatus\": false\
-	}";		
-		ptUrl = Sever_Address_GET( struSeverInfo,"");
-		printf("Sever_Address_GET\r\n");
-		Send_AT_cmd[9].SendCommand = ptUrl;
-		u8UrlLength = strlen(ptUrl)-2;
-		CmdLength(u8UrlLength,9);  //根据发送URL的长度		
-		ptPost = Post_Data_Cmd( ptPostData);
-		Send_AT_cmd[15].SendCommand = ptPost;
-		u8UrlLength = strlen(ptPost)-2;
-		CmdLength(u8UrlLength,15);  //根据发送POST的长度
-		SendPostCommand();
-		free(ptUrl);
-		free(ptPost);		
-		printf("--------------------------------------------------------------------------------------------------");
+		free(ptData);
 
 	}
 }
@@ -4110,24 +3875,6 @@ uint8_t Analysis_AT_Cmd(char *pdata)
 	return 0;
 }
 
-uint8_t Analysis_POSTDATA_Cmd(char *pdata)
-{
-	char *ptStrStart ;
-	char *ptFindResult ;
-	ptStrStart = (char*)Sim80x.UsartRxBuffer;
-	ptFindResult = strstr(ptStrStart,"OK");
-	if(ptFindResult != NULL)
-	{
-		return 1;
-	}	
-	ptFindResult = strstr(ptStrStart,"ERROR");
-	if(ptFindResult != NULL)
-	{
-		return 1;
-	}
-	return 0;
-}
-
 uint8_t Analysis_CSQ_Cmd(char *pdata)
 {
 	char *ptStrStart ;
@@ -4142,12 +3889,86 @@ uint8_t Analysis_CSQ_Cmd(char *pdata)
 			if(!(strstr(ptStrStart,"99") || strstr(ptStrStart,"0,0")))
 				return 1;
 		}
-	}
-	
+	}	
 	return 0;
 }
 
-uint8_t Analysis_QIREGAPP_Cmd(char *pdata)
+uint8_t Analysis_CGREG_Cmd(char *pdata)
+{
+	char *ptStrStart ;
+	char *ptFindResult ;
+	ptStrStart = (char*)Sim80x.UsartRxBuffer;
+	ptFindResult = strstr(ptStrStart,"OK");
+	if(ptFindResult != NULL)
+	{
+		return 1;
+	}	
+	return 0;
+}	
+uint8_t Analysis_CGACT_Cmd(char *pdata)
+{
+	char *ptStrStart ;
+	char *ptFindResult ;
+	ptStrStart = (char*)Sim80x.UsartRxBuffer;
+	ptFindResult = strstr(ptStrStart,"OK");
+	if(ptFindResult != NULL)
+	{
+		return 1;
+	}	
+	return 0;
+}
+uint8_t Analysis_CHTTPCREATE_Cmd(char *pdata)	
+{
+	char *ptStrStart ;
+	char *ptFindResult ;
+	ptStrStart = (char*)Sim80x.UsartRxBuffer;
+	ptFindResult = strstr(ptStrStart,"OK");
+	if(ptFindResult != NULL)
+	{
+		return 1;
+	}	
+	ptFindResult = strstr(ptStrStart,"ERROR");
+	if(ptFindResult != NULL)
+	{
+		return 1;
+	}	
+	return 0;
+}
+uint8_t Analysis_CHTTPSEND_Cmd(char *pdata)
+{
+	char *ptStrStart ;
+	char *ptFindResult ;
+	ptStrStart = (char*)Sim80x.UsartRxBuffer;
+	ptFindResult = strstr(ptStrStart,"+CHTTPNMIC");
+	if(ptFindResult != NULL)
+	{
+		return 1;
+	}	
+	ptFindResult = strstr(ptStrStart,"ERROR");
+	if(ptFindResult != NULL)
+	{
+		return 1;
+	}	
+	return 0;
+}
+uint8_t Analysis_CHTTPCON_Cmd(char *pdata)
+{
+	char *ptStrStart ;
+	char *ptFindResult ;
+	ptStrStart = (char*)Sim80x.UsartRxBuffer;
+	ptFindResult = strstr(ptStrStart,"OK");
+	if(ptFindResult != NULL)
+	{
+		return 1;
+	}	
+	ptFindResult = strstr(ptStrStart,"ERROR");
+	if(ptFindResult != NULL)
+	{
+		return 1;
+	}	
+	return 0;
+}
+uint8_t Analysis_CHTTPDISCON_Cmd	(char *pdata)
 {
 	char *ptStrStart ;
 	char *ptFindResult ;
@@ -4165,7 +3986,7 @@ uint8_t Analysis_QIREGAPP_Cmd(char *pdata)
 	return 0;
 }
 
-uint8_t Analysis_QIACT_Cmd(char *pdata)
+uint8_t Analysis_CHTTPDESTROY_Cmd(char *pdata)
 {
 	char *ptStrStart ;
 	char *ptFindResult ;
@@ -4183,134 +4004,6 @@ uint8_t Analysis_QIACT_Cmd(char *pdata)
 	return 0;
 }
 
-uint8_t Analysis_QILOCIP_Cmd(char *pdata)
-{
-	return 1;
-}
-
-uint8_t Analysis_SEVER_Addr_Cmd(char *pdata)
-{
-	char *ptStrStart ;
-	char *ptFindResult ;
-	ptStrStart = (char*)Sim80x.UsartRxBuffer;
-	ptFindResult = strstr(ptStrStart,"OK");
-	if(ptFindResult != NULL)
-	{
-		return 1;
-	}
-	ptFindResult = strstr(ptStrStart,"ERROR");
-	if(ptFindResult != NULL)
-	{
-		return 1;
-	}		
-	return 0;
-}
-
-uint8_t Analysis_SNI_Cmd(char *pdata)
-{
-	return 1;
-}
-
-uint8_t Analysis_QHTTPPOST_Cmd(char *pdata)
-{
-	char *ptStrStart ;
-	char *ptFindResult ;
-	ptStrStart = (char*)Sim80x.UsartRxBuffer;
-	ptFindResult = strstr(ptStrStart,"CONNECT");
-	if(ptFindResult != NULL)
-	{
-		return 1;
-	}	
-	ptFindResult = strstr(ptStrStart,"ERROR");
-	if(ptFindResult != NULL)
-	{
-		return 1;
-	}	
-	return 0;
-}
-
-uint8_t Analysis_QSSLCFG_Cmd(char *pdata)
-{
-	char *ptStrStart ;
-	char *ptFindResult ;
-	ptStrStart = (char*)Sim80x.UsartRxBuffer;
-	ptFindResult = strstr(ptStrStart,"OK");
-	if(ptFindResult != NULL)
-	{
-		return 1;
-	}	
-	return 0;
-}
-
-uint8_t Analysis_QHTTPURL_Cmd(char *pdata)
-{
-	char *ptStrStart ;
-	char *ptFindResult ;
-	ptStrStart = (char*)Sim80x.UsartRxBuffer;
-	ptFindResult = strstr(ptStrStart,"CONNECT");
-	if(ptFindResult != NULL)
-	{
-		return 1;
-	}	
-	ptFindResult = strstr(ptStrStart,"ERROR");
-	if(ptFindResult != NULL)
-	{
-		return 1;
-	}	
-	return 0;
-}
-
-uint8_t Analysis_QHTTPGET_Cmd(char *pdata)
-{
-	char *ptStrStart ;
-	char *ptFindResult ;
-	ptStrStart = (char*)Sim80x.UsartRxBuffer;
-	ptFindResult = strstr(ptStrStart,"OK");
-	if(ptFindResult != NULL)
-	{
-		return 1;
-	}	
-	ptFindResult = strstr(ptStrStart,"ERROR");
-	if(ptFindResult != NULL)
-	{
-		return 1;
-	}	
-	return 0;
-}
-
-uint8_t Analysis_QHTTPREAD_Cmd(char *pdata)
-{
-	char *ptStrStart ;
-	char *ptFindResult ;
-	ptStrStart = (char*)Sim80x.UsartRxBuffer;
-	ptFindResult = strstr(ptStrStart,"OK");
-	if(ptFindResult != NULL)
-	{
-		return 1;
-	}	
-	ptFindResult = strstr(ptStrStart,"ERROR");
-	if(ptFindResult != NULL)
-	{
-		return 1;
-	}	
-	return 0;
-}
-
-uint8_t Analysis_QIDEACT_Cmd(char *pdata)
-{
-	char *ptStrStart ;
-	char *ptFindResult ;
-	static uint8_t u8ErrorCnt = 0;
-	ptStrStart = (char*)Sim80x.UsartRxBuffer;
-	ptFindResult = strstr(ptStrStart,"OK");
-	if((ptFindResult != NULL) || (u8ErrorCnt == 10))
-	{
-		return 1;
-	}
-	u8ErrorCnt ++;		
-
-	return 0;
-}
 
 void  Sim80x_BufferProcess(void)
 {

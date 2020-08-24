@@ -76,6 +76,8 @@
 "gasmeter4\tasks.o"
 "gasmeter4\timers.o"
 "gasmeter4\cmsis_os.o"
+"gasmeter4\chartohex.o"
+"gasmeter4\hextochar.o"
 --library_type=microlib --strict --scatter "GasMeter4\GasMeter4.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers

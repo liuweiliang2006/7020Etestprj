@@ -444,19 +444,13 @@ void AppObjCreate (void);
 void AppObjCreateQueue (void);
 uint8_t Analysis_AT_Cmd(char *pdata);
 uint8_t Analysis_CSQ_Cmd(char *pdata);
-uint8_t Analysis_QIREGAPP_Cmd(char *pdata);
-uint8_t Analysis_QIACT_Cmd(char *pdata);
-uint8_t Analysis_QILOCIP_Cmd(char *pdata);
-uint8_t Analysis_SNI_Cmd(char *pdata);
-uint8_t Analysis_QSSLCFG_Cmd(char *pdata);
-uint8_t Analysis_QHTTPURL_Cmd(char *pdata);
-uint8_t Analysis_QHTTPGET_Cmd(char *pdata);
-uint8_t Analysis_QHTTPREAD_Cmd(char *pdata);
-uint8_t Analysis_QIDEACT_Cmd(char *pdata);
-uint8_t Analysis_SEVER_Addr_Cmd(char *pdata);
-uint8_t Analysis_QHTTPPOST_Cmd(char *pdata);
-uint8_t Analysis_POSTDATA_Cmd(char *pdata);
-uint8_t Analysis_POSTDATA_Cmd(char *pdata);
+uint8_t Analysis_CGREG_Cmd(char *pdata);
+uint8_t Analysis_CGACT_Cmd(char *pdata);
+uint8_t Analysis_CHTTPCREATE_Cmd(char *pdata);
+uint8_t Analysis_CHTTPSEND_Cmd(char *pdata);
+uint8_t Analysis_CHTTPCON_Cmd(char *pdata);
+uint8_t Analysis_CHTTPDISCON_Cmd	(char *pdata);
+uint8_t Analysis_CHTTPDESTROY_Cmd(char *pdata);
 //######################################################################################################################
 
 #endif
