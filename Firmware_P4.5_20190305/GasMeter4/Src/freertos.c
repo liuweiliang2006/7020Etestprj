@@ -4075,7 +4075,7 @@ uint8_t Analysis_CHTTPSEND_Cmd(char *pdata)
 	ptFindResult = strstr(ptStrStart,"+CHTTPNMIC");
 	if(ptFindResult != NULL)
 	{
-		return 1;
+		return 2;
 	}	
 	ptFindResult = strstr(ptStrStart,"ERROR");
 	if(ptFindResult != NULL)
@@ -4146,11 +4146,11 @@ uint8_t Analysis_CHTTPDESTROY_Cmd(char *pdata)
 
 void  Sim80x_BufferProcess(void)
 {
-	char      *strStart,*str1,*str2;
+	char      *strStart,*str1,*str2,*source,*destination;
 	int32_t   tmp_int32_t;
 	BaseType_t xResult;
 	uint8_t u8ATNum=0,u8AnalysisResult = 0;
-
+	uint32_t length = 0;
 //    strStart = (char*)&Sim80x.UsartRxBuffer[0];
 	while(1)
 	{
@@ -4160,10 +4160,47 @@ void  Sim80x_BufferProcess(void)
 			xQueueReceive(SendATQueue, (void *)&u8ATNum, (TickType_t)0);
 			if(u8ATNum != 0)
 			{
-				printf("AT_NO.=%d,rec:%s\r\n",u8ATNum,&Sim80x.UsartRxBuffer[0]);
+//				if(u8ATNum != 7)
+//				{
+					printf("AT_NO.=%d,rec:%s\r\n",u8ATNum,&Sim80x.UsartRxBuffer[0]);
+//				}
+//				else
+//				{
+//					source = (char *)(Sim80x.UsartRxBuffer);
+//					length = strlen(source);	
+//					destination = (char *) malloc( sizeof(int)*(length/2)+1);
+//					HexToChar(source,destination);	
+//					printf("%s",destination);
+//					free(destination);
+//				}
+				
 				u8AnalysisResult=Send_AT_cmd[u8ATNum-1].pFun(NULL);
 				if(u8AnalysisResult != 0)
+				{
+					if(u8ATNum == 7)
+					{
+						if(u8AnalysisResult == 2)
+						{
+							source = (char *)(Sim80x.UsartRxBuffer);
+							length = strlen(source);	
+							printf("malloc length is %d\r\n",length);
+							destination = (char *) malloc( sizeof(int)*(length/2)+1);
+							if(destination != NULL)
+							{
+								HexToChar(source,destination);	
+								printf("%s",destination);
+								free(destination);	
+							}
+							else
+							{
+								printf("malloc is wrong\r\n");
+							}
+													
+						}
+					}
 					Sim80x.AtCommand.FindAnswer = 1;
+				}
+					
 				
 			}
 			memset(Sim80x.UsartRxBuffer,0,_SIM80X_BUFFER_SIZE);

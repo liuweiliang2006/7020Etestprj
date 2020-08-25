@@ -44,14 +44,25 @@ static char htoi(char s[])
 
 void HexToChar(char *src,char * des)
 {
-	int i,length = 0;
+	volatile  int i,length = 0;
 	char chStr[2];
-
-	length = strlen(src);
+	char *str1;
+	
+	str1 = strstr(src,"+CHTTPNMIC");
+	str1 = strstr(str1,",");
+	str1++;
+	str1 = strstr(str1,",");
+	str1++;
+	str1 = strstr(str1,",");
+	str1++;
+	str1 = strstr(str1,",");
+	str1++;
+	//printf("%s",str1);
+	length = strlen(str1);
 	for( i =0 ; i < length/2 ; i++)
 	{
-		chStr[0] = src[i*2];
-		chStr[1] = src[i*2+1];
+		chStr[0] = str1[i*2];
+		chStr[1] = str1[i*2+1];
 		des[i] = htoi(chStr);
 		chStr[0] = '\0';
 		chStr[1] = '\0';
