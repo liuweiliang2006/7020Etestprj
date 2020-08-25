@@ -3707,8 +3707,8 @@ stru_P4_command_t Send_AT_cmd[]={
 /*2*/			{     	3,			 "AT+CGREG?\r\n",														Analysis_CGREG_Cmd					},
 /*3*/			{     	4,			 "AT+CGACT?\r\n",														Analysis_CGACT_Cmd					},
 /*4*/			{     	5,			 NULL,																			Analysis_CHTTPCREATE_Cmd		}, //AT+CHTTPCREATE="https://ateei9d448.execute-api.eu-west-1.amazonaws.com/"
-/*5*/			{     	6,			 "AT+CHTTPCON=0\r\n",												Analysis_CHTTPCON_Cmd				},//AT+CHTTPSEND=0,0,"/testing/meter/settings/TZ00000525"
-/*6*/			{     	7,			 NULL,																			Analysis_CHTTPSEND_Cmd			},
+/*5*/			{     	6,			 "AT+CHTTPCON=0\r\n",												Analysis_CHTTPCON_Cmd				},
+/*6*/			{     	7,			 NULL,																			Analysis_CHTTPSEND_Cmd			},//AT+CHTTPSEND=0,0,"/testing/meter/settings/TZ00000525"
 /*7*/			{     	8,			 "AT+CHTTPDISCON=0\r\n",										Analysis_CHTTPDISCON_Cmd		},
 /*8*/			{     	9,			 "AT+CHTTPDESTROY=0\r\n",										Analysis_CHTTPDESTROY_Cmd		},
 };
@@ -3755,6 +3755,28 @@ static char * HTTPS_Get_Data(char *version,char *meterid)
 	return ptUrlInfo;
 }
 
+static char * HTTPS_Post_Data(char *version,char *meterid,char *postdata)
+{
+	char* ptUrlInfo;
+	char* ptHeadInfo =",4163636570743a202a2f2a0d0a,\"application/json\",";
+	volatile uint16_t length = 0;
+	length = strlen(version)+strlen(meterid)+strlen("AT+CHTTPSEND=0,1,")+strlen(ptHeadInfo)+strlen(postdata)+15;
+	ptUrlInfo = (char *)malloc(strlen(version)+strlen(meterid)+strlen("AT+CHTTPSEND=0,1,")+strlen(ptHeadInfo)+strlen(postdata)+15);
+//	ptUrlInfo = (char *)malloc(strlen(version)+strlen(meterid)+strlen("AT+CHTTPSEND=0,1,")+strlen(ptHeadInfo)+15);
+	if(ptUrlInfo != NULL)//·ÖÅä³É¹¦
+	{
+		strcat(ptUrlInfo,"AT+CHTTPSEND=0,1,");
+		strcat(ptUrlInfo,"\"/");
+		strcat(ptUrlInfo,version);
+		strcat(ptUrlInfo,meterid);
+		strcat(ptUrlInfo,"\"");
+		strcat(ptUrlInfo,ptHeadInfo);
+		strcat(ptUrlInfo,postdata);
+		strcat(ptUrlInfo,"\r\n");
+	}	
+	return ptUrlInfo;
+}
+
 static char * Post_Data_Cmd(char *postdata)
 {
 	char* ptPostInfo;
@@ -3791,8 +3813,7 @@ static void SendGetCommand()
 				Sim80x_SendAtCommand(Send_AT_cmd[u8GetNum[i]].SendCommand,1000,1,"OK\r\n");
 				osDelay(2000);
 			}
-		}
-		
+		}		
 	}
 }
 QueueHandle_t SendATQueue = NULL;
@@ -3826,7 +3847,9 @@ void Sim7020Etest_Task(void const * argument)
 	uint32_t count_times = 1;
 	char *ptUrl,*ptData;
 	char *ptPostData;
+	char *destination;
 	volatile uint16_t u16UrlLength = 0;
+	
 	
 	Send_AT_cmd[14].SendCommand =(char *)malloc(20);
 	struSeverInfo = (struct SeverInfo *) malloc(sizeof(struct SeverInfo));
@@ -3837,23 +3860,128 @@ void Sim7020Etest_Task(void const * argument)
 	HAL_UART_Receive_IT(&_SIM80X_USART,&Sim80x.UsartRxTemp,1);
 	while(1)
 	{
+		printf("************************************************************************************************\r\n");
+		printf("test times %d\r\n",count_times);
+		count_times++;
+		
 		struSeverInfo->Sendsever = SEVER_URL;
 		u16UrlLength = strlen(struSeverInfo->Sendsever);
 		struSeverInfo->SeverVer = SEVER_VERSION;
 		struSeverInfo->CardID = "";
-		
-		struSeverInfo->MeterId = "/meter/settings/TZ00000525";		
+		/*GetMeterSetting */
+		printf("-----------------GetMeterSetting-----------------\r\n");
+		struSeverInfo->MeterId = "meter/settings/TZ00000525";		
 		ptUrl = Sever_Address_GET(struSeverInfo->Sendsever);
 		u16UrlLength = strlen(ptUrl);
-		Send_AT_cmd[4].SendCommand = ptUrl;
-		
+		Send_AT_cmd[4].SendCommand = ptUrl;		
 		ptData = HTTPS_Get_Data(struSeverInfo->SeverVer,struSeverInfo->MeterId);
 		u16UrlLength = strlen(ptData);
 		Send_AT_cmd[6].SendCommand = ptData;
-		SendGetCommand();
-		
+		SendGetCommand();		
 		free(ptUrl);
 		free(ptData);
+		
+		/*GetMeterFirmware*/
+		printf("-----------------GetMeterFirmware-----------------\r\n");
+		struSeverInfo->MeterId = "meter/firmware/TZ00000525";		
+		ptUrl = Sever_Address_GET(struSeverInfo->Sendsever);
+		u16UrlLength = strlen(ptUrl);
+		Send_AT_cmd[4].SendCommand = ptUrl;		
+		ptData = HTTPS_Get_Data(struSeverInfo->SeverVer,struSeverInfo->MeterId);
+		u16UrlLength = strlen(ptData);
+		Send_AT_cmd[6].SendCommand = ptData;
+		SendGetCommand();		
+		free(ptUrl);
+		free(ptData);		
+		
+		/*PostMeterSettint*/
+		printf("-----------------PostMeterSetting-----------------\r\n");
+		struSeverInfo->MeterId = "/meter/settings/TZ00000525";
+		ptPostData = "{\"command\": \"STUP\",\
+		\"serverIPaddress\": \"198.51.100.42\",\
+		\"serverPort\": 5070,\
+		\"serverURL\": \"https//xxxxx/xxxx\",\
+		\"gasLevel\": 9800,\
+		\"dataUploadPeriod\": 360,\
+		\"warningLowBatteryVoltage\": 4.5,\
+		\"warningLowCreditBalance\": 80,\
+		\"warningLowGasVolumeAlarm\": 2000,\
+		\"metercurrency\": \"KSH\",\
+		\"uploadFrequency\": 360,\
+		\"uploadTime\": 0,\
+		\"sensorSlope\": 2.3,\
+		\"sensorIntercept\": 0.1,\
+		\"settingDatestamp\": \"2016-08-29T09:12:33.001Z\"}";				
+		ptUrl = Sever_Address_GET(struSeverInfo->Sendsever);
+		u16UrlLength = strlen(ptUrl);
+		Send_AT_cmd[4].SendCommand = ptUrl;		
+		u16UrlLength = strlen(ptPostData);
+		destination = (char *) malloc(sizeof(char)*u16UrlLength*2+1);
+		CharToHex(ptPostData,destination);
+		ptData = HTTPS_Post_Data(struSeverInfo->SeverVer,struSeverInfo->MeterId,destination);
+		Send_AT_cmd[6].SendCommand = ptData;
+		SendGetCommand();
+		free(destination);
+		free(ptUrl);
+		free(ptData);
+		
+		
+		/*PostMeterStatusAPI*/
+		printf("-----------------PostMeterStatusAPI-----------------\r\n");
+		struSeverInfo->MeterId = "meter/status/TZ00000235";
+		ptPostData = "{\"batteryVoltage\": 4,\
+		\"gasTemperature\": 30,\
+		\"tankLockStatus\": false,\
+		\"tankSensorStatus\": false,\
+		\"gsmSignalIntensity\": 15,\
+		\"needleSensorStatus\": false,\
+		\"lidLightSensorStatus\": false,\
+		\"electronicValveStatus\": false,\
+		\"lidElectricLockStatus\": false,\
+		\"meterStatusDatestamp\": \"2020-08-15T09:12:33.001Z\"}";		
+		ptUrl = Sever_Address_GET(struSeverInfo->Sendsever);
+		u16UrlLength = strlen(ptUrl);
+		Send_AT_cmd[4].SendCommand = ptUrl;		
+		u16UrlLength = strlen(ptPostData);
+		destination = (char *) malloc(sizeof(char)*u16UrlLength*2+1);
+		CharToHex(ptPostData,destination);
+		ptData = HTTPS_Post_Data(struSeverInfo->SeverVer,struSeverInfo->MeterId,destination);
+		Send_AT_cmd[6].SendCommand = ptData;
+		SendGetCommand();
+		free(destination);
+		free(ptUrl);
+		free(ptData);
+		
+		/*PostMeterWaring*/
+		printf("-----------------PostMeterWaring-----------------\r\n");
+		struSeverInfo->MeterId = "meter/warning/TZ00000131";
+		ptPostData = "{\"warningName\":\"Low Gas Warning\",\
+		\"warningDateTimestamp\":\"2016-08-29T09:12:33.001Z\",\
+		\"warningId\":\"xxxxx\",\
+		\"lowGas\":112,\
+		\"lidOpen\":false,\
+		\"lowCredit\":false,\
+		\"lowBattery\":4.2,\
+		\"gasTemperature\":31.1,\
+		\"tankSensorStatus\":false,\
+		\"tankSensorStatus2\":false,\
+		\"electricLockStatus\":false,\
+		\"gsmSignalIntensity\":20.1,\
+		\"needleSensorStatus\":false,\
+		\"electricValveStatus\":false}";
+		ptUrl = Sever_Address_GET(struSeverInfo->Sendsever);
+		u16UrlLength = strlen(ptUrl);
+		Send_AT_cmd[4].SendCommand = ptUrl;		
+		u16UrlLength = strlen(ptPostData);
+		destination = (char *) malloc(sizeof(char)*u16UrlLength*2+1);
+		CharToHex(ptPostData,destination);
+		ptData = HTTPS_Post_Data(struSeverInfo->SeverVer,struSeverInfo->MeterId,destination);
+		Send_AT_cmd[6].SendCommand = ptData;
+		SendGetCommand();
+		free(destination);
+		free(ptUrl);
+		free(ptData);
+		printf("************************************************************************************************\r\n");
 
 	}
 }
@@ -3927,6 +4055,11 @@ uint8_t Analysis_CHTTPCREATE_Cmd(char *pdata)
 	{
 		return 1;
 	}	
+	ptFindResult = strstr(ptStrStart,"CHTTPCREATE");
+	if(ptFindResult != NULL)
+	{
+		return 1;
+	}
 	ptFindResult = strstr(ptStrStart,"ERROR");
 	if(ptFindResult != NULL)
 	{
@@ -3949,6 +4082,12 @@ uint8_t Analysis_CHTTPSEND_Cmd(char *pdata)
 	{
 		return 1;
 	}	
+	ptFindResult = strstr(ptStrStart,"CHTTPERR");
+	if(ptFindResult != NULL)
+	{
+		return 1;
+	}	
+	
 	return 0;
 }
 uint8_t Analysis_CHTTPCON_Cmd(char *pdata)

@@ -26,9 +26,300 @@ Project File Date:  08/24/2020
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 6 (build 750)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
-Build target 'GasMeter4_APP1'
+Rebuild target 'GasMeter4_APP1'
+assembling startup_stm32f030xc.s...
+compiling key.c...
+compiling ht1621b.c...
+compiling MFRC522.c...
+../Inc/StringUtils.h(35): warning:  #1295-D: Deprecated declaration GetSoftWareTime - give arg types
+  char * GetSoftWareTime();
+..\Drivers\BSP\Src\MFRC522.c(584): warning:  #550-D: variable "status"  was set but never used
+    uchar status;
+..\Drivers\BSP\Src\MFRC522.c: 2 warnings, 0 errors
+compiling lcd.c...
+..\Drivers\BSP\Src\lcd.c(37): warning:  #550-D: variable "IsContinue"  was set but never used
+  	bool IsContinue = true;
+..\Drivers\BSP\Src\lcd.c(246): warning:  #188-D: enumerated type mixed with another type
+  		Update_Type = Update_Type | Update_num;
+..\Drivers\BSP\Src\lcd.c(269): warning:  #188-D: enumerated type mixed with another type
+  		Update_Type = Update_Type | Update_Signal_1;
+..\Drivers\BSP\Src\lcd.c(274): warning:  #188-D: enumerated type mixed with another type
+  		Update_Type = Update_Type | Update_Signal_2;
+..\Drivers\BSP\Src\lcd.c(279): warning:  #188-D: enumerated type mixed with another type
+  		Update_Type = Update_Type | Update_Signal_3;
+..\Drivers\BSP\Src\lcd.c(284): warning:  #188-D: enumerated type mixed with another type
+  		Update_Type = Update_Type | Update_Signal_4;
+..\Drivers\BSP\Src\lcd.c(289): warning:  #188-D: enumerated type mixed with another type
+  		Update_Type = Update_Type | Update_Signal_5;
+..\Drivers\BSP\Src\lcd.c(294): warning:  #188-D: enumerated type mixed with another type
+  		Update_Type = Update_Type | Update_Bluetooth;
+..\Drivers\BSP\Src\lcd.c(299): warning:  #188-D: enumerated type mixed with another type
+  		Update_Type = Update_Type | Update_RFID;
+..\Drivers\BSP\Src\lcd.c(304): warning:  #188-D: enumerated type mixed with another type
+  		Update_Type = Update_Type | Update_WRAN;
+..\Drivers\BSP\Src\lcd.c(309): warning:  #188-D: enumerated type mixed with another type
+  		Update_Type = Update_Type | Update_ValveW;
+..\Drivers\BSP\Src\lcd.c(314): warning:  #188-D: enumerated type mixed with another type
+  		Update_Type = Update_Type | Update_ValveL;
+..\Drivers\BSP\Src\lcd.c(319): warning:  #188-D: enumerated type mixed with another type
+  		Update_Type = Update_Type | Update_ValveM;
+..\Drivers\BSP\Src\lcd.c(324): warning:  #188-D: enumerated type mixed with another type
+  		Update_Type = Update_Type | Update_ValveR;
+..\Drivers\BSP\Src\lcd.c(329): warning:  #188-D: enumerated type mixed with another type
+  		Update_Type = Update_Type | Update_syncBig;
+..\Drivers\BSP\Src\lcd.c(334): warning:  #188-D: enumerated type mixed with another type
+  		Update_Type = Update_Type | Update_syncMid;
+..\Drivers\BSP\Src\lcd.c(339): warning:  #188-D: enumerated type mixed with another type
+  		Update_Type = Update_Type | Update_syncSma;
+..\Drivers\BSP\Src\lcd.c(344): warning:  #188-D: enumerated type mixed with another type
+  		Update_Type = Update_Type | Update_cylinder;
+..\Drivers\BSP\Src\lcd.c(349): warning:  #188-D: enumerated type mixed with another type
+  		Update_Type = Update_Type | Update_KgSign;
+..\Drivers\BSP\Src\lcd.c(354): warning:  #188-D: enumerated type mixed with another type
+  		Update_Type = Update_Type | Update_MONEY;
+..\Drivers\BSP\Src\lcd.c(359): warning:  #188-D: enumerated type mixed with another type
+  		Update_Type = Update_Type | Update_POINT1;
+..\Drivers\BSP\Src\lcd.c(364): warning:  #188-D: enumerated type mixed with another type
+  		Update_Type = Update_Type | Update_POINT2;
+..\Drivers\BSP\Src\lcd.c(369): warning:  #188-D: enumerated type mixed with another type
+  		Update_Type = Update_Type | Update_POINT3;
+..\Drivers\BSP\Src\lcd.c(374): warning:  #188-D: enumerated type mixed with another type
+  		Update_Type = Update_Type | Update_POINT4;
+..\Drivers\BSP\Src\lcd.c(379): warning:  #188-D: enumerated type mixed with another type
+  		Update_Type = Update_Type | Update_POINT5;
+..\Drivers\BSP\Src\lcd.c(384): warning:  #188-D: enumerated type mixed with another type
+  		Update_Type = Update_Type | Update_POINT6;
+..\Drivers\BSP\Src\lcd.c(389): warning:  #188-D: enumerated type mixed with another type
+  		Update_Type = Update_Type | Update_BATS0;
+..\Drivers\BSP\Src\lcd.c(394): warning:  #188-D: enumerated type mixed with another type
+  		Update_Type = Update_Type | Update_BATS1;
+..\Drivers\BSP\Src\lcd.c(399): warning:  #188-D: enumerated type mixed with another type
+  		Update_Type = Update_Type | Update_BATS2;
+..\Drivers\BSP\Src\lcd.c(404): warning:  #188-D: enumerated type mixed with another type
+  		Update_Type = Update_Type | Update_BATS3;
+..\Drivers\BSP\Src\lcd.c(409): warning:  #188-D: enumerated type mixed with another type
+  		Update_Type = Update_Type | Update_BATS4;
+..\Drivers\BSP\Src\lcd.c: 31 warnings, 0 errors
+compiling bsp_spiflash.c...
+../Inc/StringUtils.h(35): warning:  #1295-D: Deprecated declaration GetSoftWareTime - give arg types
+  char * GetSoftWareTime();
+..\Drivers\BSP\Src\bsp_spiflash.c: 1 warning, 0 errors
+compiling printf.c...
+compiling motor.c...
+compiling GPRSUser.c...
+..\Middlewares\Third_Party\GsmLib\GPRSUser.c(77): warning:  #111-D: statement is unreachable
+      return false;
+..\Middlewares\Third_Party\GsmLib\GPRSUser.c: 1 warning, 0 errors
+compiling GPRS.c...
+compiling GsmUser.c...
+compiling Sim80xUser.c...
+../Inc/StringUtils.h(35): warning:  #1295-D: Deprecated declaration GetSoftWareTime - give arg types
+  char * GetSoftWareTime();
+..\Middlewares\Third_Party\GsmLib\Sim80xUser.c: 1 warning, 0 errors
+compiling ControlPacket.c...
+../Inc/StringUtils.h(35): warning:  #1295-D: Deprecated declaration GetSoftWareTime - give arg types
+  char * GetSoftWareTime();
+..\User\ControlPacket.c: 1 warning, 0 errors
+compiling Gsm.c...
+compiling Sim80x.c...
+..\Middlewares\Third_Party\GsmLib\Sim80x.c(84): warning:  #177-D: variable "i"  was declared but never referenced
+  	  uint32_t i = 0;
+..\Middlewares\Third_Party\GsmLib\Sim80x.c(1029): warning:  #223-D: function "USART_SendData" declared implicitly
+          sim900a_send_byte((uint32_t)cmd);
+..\Middlewares\Third_Party\GsmLib\Sim80x.c(1031): warning:  #223-D: function "usart_printf" declared implicitly
+          sim900a_usart("%s\r\n", cmd );
+..\Middlewares\Third_Party\GsmLib\Sim80x.c(1135): warning:  #940-D: missing return statement at end of non-void function "httpsendread" 
+  }
+..\Middlewares\Third_Party\GsmLib\Sim80x.c: 4 warnings, 0 errors
+compiling CookingSessionReport.c...
+../Inc/CookingSessionReport.h(42): warning:  #1295-D: Deprecated declaration SendCookingSessionPacket - give arg types
+  bool SendCookingSessionPacket();
+../Inc/StringUtils.h(35): warning:  #1295-D: Deprecated declaration GetSoftWareTime - give arg types
+  char * GetSoftWareTime();
+..\User\CookingSessionReport.c: 2 warnings, 0 errors
+compiling CustomerCredit.c...
+../Inc/StringUtils.h(35): warning:  #1295-D: Deprecated declaration GetSoftWareTime - give arg types
+  char * GetSoftWareTime();
+..\User\CustomerCredit.c: 1 warning, 0 errors
+compiling HeartbeatPacket.c...
+../Inc/StringUtils.h(35): warning:  #1295-D: Deprecated declaration GetSoftWareTime - give arg types
+  char * GetSoftWareTime();
+..\User\HeartbeatPacket.c: 1 warning, 0 errors
+compiling ReportDataPacket.c...
+../Inc/StringUtils.h(35): warning:  #1295-D: Deprecated declaration GetSoftWareTime - give arg types
+  char * GetSoftWareTime();
+..\User\ReportDataPacket.c: 1 warning, 0 errors
+compiling InformationPacket.c...
+../Inc/StringUtils.h(35): warning:  #1295-D: Deprecated declaration GetSoftWareTime - give arg types
+  char * GetSoftWareTime();
+..\User\InformationPacket.c: 1 warning, 0 errors
+compiling RechargePacket.c...
+../Inc/StringUtils.h(35): warning:  #1295-D: Deprecated declaration GetSoftWareTime - give arg types
+  char * GetSoftWareTime();
+..\User\RechargePacket.c: 1 warning, 0 errors
+compiling package.c...
+../Inc/StringUtils.h(35): warning:  #1295-D: Deprecated declaration GetSoftWareTime - give arg types
+  char * GetSoftWareTime();
+../Inc/CookingSessionReport.h(42): warning:  #1295-D: Deprecated declaration SendCookingSessionPacket - give arg types
+  bool SendCookingSessionPacket();
+..\User\package.c: 2 warnings, 0 errors
+compiling ReportStatePacket.c...
+../Inc/StringUtils.h(35): warning:  #1295-D: Deprecated declaration GetSoftWareTime - give arg types
+  char * GetSoftWareTime();
+..\User\ReportStatePacket.c: 1 warning, 0 errors
+compiling WaringPacket.c...
+../Inc/StringUtils.h(35): warning:  #1295-D: Deprecated declaration GetSoftWareTime - give arg types
+  char * GetSoftWareTime();
+..\User\WaringPacket.c: 1 warning, 0 errors
+compiling SetupPacket.c...
+../Inc/StringUtils.h(35): warning:  #1295-D: Deprecated declaration GetSoftWareTime - give arg types
+  char * GetSoftWareTime();
+..\User\SetupPacket.c: 1 warning, 0 errors
+compiling UsedResetPacket.c...
+../Inc/StringUtils.h(35): warning:  #1295-D: Deprecated declaration GetSoftWareTime - give arg types
+  char * GetSoftWareTime();
+..\User\UsedResetPacket.c: 1 warning, 0 errors
+compiling MB85RS16A.c...
+../Inc/StringUtils.h(35): warning:  #1295-D: Deprecated declaration GetSoftWareTime - give arg types
+  char * GetSoftWareTime();
+..\User\MB85RS16A.c: 1 warning, 0 errors
+compiling W25Q64.c...
+../Inc/StringUtils.h(35): warning:  #1295-D: Deprecated declaration GetSoftWareTime - give arg types
+  char * GetSoftWareTime();
+..\User\W25Q64.c: 1 warning, 0 errors
+compiling StringUtils.c...
+../Inc/StringUtils.h(35): warning:  #1295-D: Deprecated declaration GetSoftWareTime - give arg types
+  char * GetSoftWareTime();
+..\User\StringUtils.c: 1 warning, 0 errors
+compiling adc.c...
+compiling dma.c...
+compiling gpio.c...
+compiling usartConfig.c...
+../Inc/StringUtils.h(35): warning:  #1295-D: Deprecated declaration GetSoftWareTime - give arg types
+  char * GetSoftWareTime();
+..\User\usartConfig.c(208): warning:  #177-D: function "string_to_dec"  was declared but never referenced
+  static int32_t string_to_dec(uint8_t *buf,uint32_t len)
+..\User\usartConfig.c: 2 warnings, 0 errors
+compiling LogUtils.c...
+../Inc/StringUtils.h(35): warning:  #1295-D: Deprecated declaration GetSoftWareTime - give arg types
+  char * GetSoftWareTime();
+../Inc/CookingSessionReport.h(42): warning:  #1295-D: Deprecated declaration SendCookingSessionPacket - give arg types
+  bool SendCookingSessionPacket();
+..\User\LogUtils.c(135): warning:  #68-D: integer conversion resulted in a change of sign
+  				if(Log_index.LogAddr >= 0x500000 && Log_index.LogAddr != -1 && Log_index.LogAddr != 0 && Log_index.LogAddr != 100)
+..\User\LogUtils.c: 3 warnings, 0 errors
+compiling main.c...
+../Inc/StringUtils.h(35): warning:  #1295-D: Deprecated declaration GetSoftWareTime - give arg types
+  char * GetSoftWareTime();
+../Src/main.c(467): warning:  #177-D: variable "i"  was declared but never referenced
+  	 uint32_t i = 0;
+../Src/main.c: 2 warnings, 0 errors
+compiling iwdg.c...
+compiling rtc.c...
+compiling tim.c...
+compiling spi.c...
+compiling usart.c...
+../Src/usart.c(288): warning:  #223-D: function "USART_SendData" declared implicitly
+  				USART_SendData(USARTx, 0x0d);
+../Src/usart.c(307): warning:  #223-D: function "USART_SendData" declared implicitly
+  					USART_SendData(USARTx, *s);
+../Src/usart.c(308): warning:  #223-D: function "USART_GetFlagStatus" declared implicitly
+  					while (USART_GetFlagStatus(USARTx, USART_FLAG_TXE) == RESET)
+../Src/usart.c(320): warning:  #223-D: function "USART_SendData" declared implicitly
+  					USART_SendData(USARTx, *s);
+../Src/usart.c(321): warning:  #223-D: function "USART_GetFlagStatus" declared implicitly
+  					while (USART_GetFlagStatus(USARTx, USART_FLAG_TXE) == RESET)
+../Src/usart.c(331): warning:  #223-D: function "USART_SendData" declared implicitly
+  			USART_SendData(USARTx, *Data++);
+../Src/usart.c(332): warning:  #223-D: function "USART_GetFlagStatus" declared implicitly
+  		while (USART_GetFlagStatus(USARTx, USART_FLAG_TXE) == RESET)
+../Src/usart.c: 7 warnings, 0 errors
+compiling stm32f0xx_it.c...
+compiling freertos.c...
+../Inc/StringUtils.h(35): warning:  #1295-D: Deprecated declaration GetSoftWareTime - give arg types
+  char * GetSoftWareTime();
+../Inc/CookingSessionReport.h(42): warning:  #1295-D: Deprecated declaration SendCookingSessionPacket - give arg types
+  bool SendCookingSessionPacket();
+../Inc/hextochar.h(6): warning:  #1-D: last line of file ends without a newline
+  #endif 
+../Inc/chartohex.h(6): warning:  #1-D: last line of file ends without a newline
+  #endif 
+../Src/freertos.c(298): warning:  #1295-D: Deprecated declaration IntoLowPower - give arg types
+  void IntoLowPower();
+../Src/freertos.c(731): warning:  #550-D: variable "Card_cap"  was set but never used
+      uint8_t Card_cap;//卡片容量
+../Src/freertos.c(3794): warning:  #940-D: missing return statement at end of non-void function "Post_Data_Cmd" 
+  }
+../Src/freertos.c(3799): warning:  #177-D: variable "Waiting_ms"  was declared but never referenced
+  	uint32_t Waiting_ms = 0;
+../Src/freertos.c(3854): warning:  #175-D: subscript out of range
+  	Send_AT_cmd[14].SendCommand =(char *)malloc(20);
+../Src/freertos.c(3846): warning:  #177-D: variable "result"  was declared but never referenced
+  	uint8_t result = 0 , i = 0; //于用标识，是否响应了当前的指令
+../Src/freertos.c(3846): warning:  #177-D: variable "i"  was declared but never referenced
+  	uint8_t result = 0 , i = 0; //于用标识，是否响应了当前的指令
+../Src/freertos.c(4184): warning:  #111-D: statement is unreachable
+      Sim80x.UsartRxIndex=0;
+../Src/freertos.c(4149): warning:  #177-D: variable "strStart"  was declared but never referenced
+  	char      *strStart,*str1,*str2;
+../Src/freertos.c(4149): warning:  #177-D: variable "str1"  was declared but never referenced
+  	char      *strStart,*str1,*str2;
+../Src/freertos.c(4149): warning:  #177-D: variable "str2"  was declared but never referenced
+  	char      *strStart,*str1,*str2;
+../Src/freertos.c(4150): warning:  #177-D: variable "tmp_int32_t"  was declared but never referenced
+  	int32_t   tmp_int32_t;
+../Src/freertos.c(3780): warning:  #177-D: function "Post_Data_Cmd"  was declared but never referenced
+  static char * Post_Data_Cmd(char *postdata)
+../Src/freertos.c: 17 warnings, 0 errors
+compiling stm32f0xx_hal_msp.c...
+compiling stm32f0xx_hal_timebase_TIM.c...
+compiling stm32f0xx_hal_iwdg.c...
+compiling stm32f0xx_hal_adc_ex.c...
+compiling stm32f0xx_hal_adc.c...
+compiling stm32f0xx_hal_rtc.c...
+compiling stm32f0xx_hal_rtc_ex.c...
+compiling stm32f0xx_hal_spi_ex.c...
+compiling stm32f0xx_hal_tim_ex.c...
+compiling stm32f0xx_hal_spi.c...
+compiling stm32f0xx_hal_uart_ex.c...
+compiling stm32f0xx_hal_uart.c...
+compiling stm32f0xx_hal_rcc.c...
+compiling stm32f0xx_hal_tim.c...
+compiling stm32f0xx_hal_rcc_ex.c...
+compiling stm32f0xx_hal.c...
+compiling stm32f0xx_hal_i2c_ex.c...
+compiling stm32f0xx_hal_gpio.c...
+compiling stm32f0xx_hal_cortex.c...
+compiling stm32f0xx_hal_dma.c...
+compiling stm32f0xx_hal_i2c.c...
+compiling heap_4.c...
+compiling stm32f0xx_hal_pwr.c...
+compiling croutine.c...
+compiling port.c...
+compiling list.c...
+compiling stm32f0xx_hal_pwr_ex.c...
+compiling event_groups.c...
+compiling stm32f0xx_hal_flash.c...
+compiling queue.c...
+compiling system_stm32f0xx.c...
+compiling stm32f0xx_hal_flash_ex.c...
+compiling timers.c...
+compiling chartohex.c...
+..\Src\chartohex.c(21): warning:  #177-D: variable "i"  was declared but never referenced
+      int i = 0;  
+..\Src\chartohex.c(22): warning:  #177-D: variable "n"  was declared but never referenced
+      int n = 0;  
+..\Src\chartohex.c(6): warning:  #177-D: function "tolower"  was declared but never referenced
+  static int tolower(int c)  
+..\Src\chartohex.c: 3 warnings, 0 errors
+compiling hextochar.c...
+compiling tasks.c...
+compiling cmsis_os.c...
+linking...
+Program Size: Code=43824 RO-data=2676 RW-data=508 ZI-data=25580  
+FromELF: creating hex file...
 After Build - User command #2: fromelf --bin -o "GasMeter4\GasMeter4.bin" "GasMeter4\GasMeter4.axf"
-"GasMeter4\GasMeter4.axf" - 0 Error(s), 0 Warning(s).
+"GasMeter4\GasMeter4.axf" - 0 Error(s), 91 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -51,7 +342,7 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.4.0
-Build Time Elapsed:  00:00:01
+Build Time Elapsed:  00:00:31
 </pre>
 </body>
 </html>
